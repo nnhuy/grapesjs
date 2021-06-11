@@ -36,6 +36,7 @@ export default {
   },
 
   buildEditor(codeName, theme, label) {
+    console.log('test code');
     const input = document.createElement('textarea');
     !this.codeMirror && (this.codeMirror = this.cm.getViewer('CodeMirror'));
 
