@@ -1,7 +1,7 @@
-export default grapesjs.plugins.add('bys-command-custom-export-template', (editor, options) => {
+export default grapesjs.plugins.add('bys-command-custom-export-template-promise', (editor, options) => {
 
     const commands = editor.Commands;
-    commands.add('custom-export-template', {
+    commands.add('custom-export-template-promise', {
         run(editor, sender, opts = {}) {
             sender && sender.set && sender.set('active', 0);
             const config = editor.getConfig();
@@ -44,7 +44,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                     if (e.tagName === 'DIV') {
                         const idOfTag = e.getAttribute('id');
                         let command = `var ${idOfTag}Value = ${valueOnload};\n`;
-                        command += `document.getElementById('${idOfTag}').innerHtml = ${idOfTag}Value;\n`
+                        command += `${idOfTag}Value.then(value => document.getElementById('${idOfTag}').innerHtml = value);\n`
                         scriptTag.append(command);
                     } else if (e.tagName === 'SELECT') {
                         // create json object
@@ -61,14 +61,16 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                         const idOfTag = e.getAttribute('id');
                         let command = `var ${idOfTag}SendData = ${JSON.stringify(jsonObject)};
                         var ${idOfTag}Value = window.parent.Call_API_GetMasterData(${idOfTag}SendData);
-                        if (${idOfTag}Value.Result) {
-                          for(var i = 0; i < ${idOfTag}Value.Values.length; i++){
-                            var option = document.createElement("option");
-                            option.text = ${idOfTag}Value.Values[i];
-                            option.value = ${idOfTag}Value.Values[i];
-                            document.getElementById('${idOfTag}').appendChild(option);
-                          };
-                        }\n`;
+                        ${idOfTag}Value.then(value => {
+                            if (value.Result) {
+                                for(var i = 0; i < value.Values.length; i++){
+                                    var option = document.createElement("option");
+                                    option.text = value.Values[i];
+                                    option.value = value.Values[i];
+                                    document.getElementById('${idOfTag}').appendChild(option);
+                                };
+                            }
+                        });\n`;
                         scriptTag.append(command);
                     }
                 }
