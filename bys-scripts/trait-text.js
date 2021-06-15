@@ -3,15 +3,15 @@ export default grapesjs.plugins.add('bys-trait-text', (editor, options) => {
     var _initialize = textType.model.prototype.initialize;
     textType.model.prototype.initialize = function () {
         _initialize.apply(this, arguments);
-
+        this.removeTrait('id');
         this.get("traits").add({
             type: "select",
             label: "value",
             name: "bys-value",
             options: [ // Array of options
                 { value: '', name: '' },
-                { value: 'window.parent.CRM_Global_Information.getUserId()', name: 'getUserId' },
-                { value: 'window.parent.CRM_Global_Information.getWorkId()', name: 'getWorkId' },
+                { value: 'window.parent.CRM_Global_Information.getUserId()', name: 'GetUserId' },
+                { value: 'window.parent.CRM_Global_Information.getWorkId()', name: 'GetWorkId' },
             ]
         });
         this.get("traits").add({

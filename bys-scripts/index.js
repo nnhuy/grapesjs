@@ -26,6 +26,9 @@ var editor = grapesjs.init({
         exportZip,
         exportZipPromise
     ],
+    pluginsOpts: {
+
+    },
     styleManager: {
         clearProperties: 1,
         sectors: [{
@@ -115,3 +118,7 @@ panelManager.addButton('options', {
 //     attributes: { title: 'Export Zip' },
 //     active: false,
 // });
+const pageTitle = document.createElement('div');
+pageTitle.innerHTML = 'CRM PageEditor';
+pageTitle.classList.add('page-title');
+panelManager.getPanelsEl().getElementsByClassName("gjs-pn-devices-c")[0].prepend(pageTitle);

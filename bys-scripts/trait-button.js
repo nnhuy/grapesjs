@@ -3,14 +3,14 @@ export default grapesjs.plugins.add('bys-trait-button', (editor, options) => {
     var _initialize = textType.model.prototype.initialize;
     textType.model.prototype.initialize = function () {
         _initialize.apply(this, arguments);
-
+        this.removeTrait('type');
         this.get("traits").add({
             type: "select",
             label: "Click",
             name: "onclick",
             options: [ // Array of options
                 { value: '', name: '' },
-                { value: 'openModalSendEmail()', name: 'sendEmail' }
+                { value: 'openModalSendEmail()', name: 'SendEmail' }
             ]
         });
         // this.get("traits").add({

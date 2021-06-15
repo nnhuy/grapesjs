@@ -147,7 +147,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             mailsettingid
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="mailsettingid">
+                            <input class="form-control" pattern="[0-9]+" name="mailsettingid" placeholder="使用するメールセッティングＩＤ">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -155,7 +155,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             state
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="state">
+                            <input class="form-control" pattern="[0-1]{1}" name="state" placeholder="0：送信しないでＤＢのみ登録, 1：以上はそのまま送信する">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -163,7 +163,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             linkid
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="linkid">
+                            <input class="form-control" pattern="[0-9]+" name="linkid" placeholder="DB紐づけなどに使用出来る任意数値設定。spkidなどをいれてリレーション時などに使用する">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -171,7 +171,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             from
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="from">
+                            <input class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" name="from" placeholder="送信者の情報 構文：名前<aaa@bbb.co.jp>">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -179,7 +179,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             to
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="to">
+                            <input class="form-control" pattern="^(\s*,?\s*[0-9a-za-z]([-.\w]*[0-9a-za-z])*@([0-9a-za-z][-\w]*[0-9a-za-z]\.)+[a-za-z]{2,4})+\s*$" name="to" placeholder="to。複数はカンマ区切り。構文はfrom同様">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -187,7 +187,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             cc
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="cc">
+                            <input class="form-control" pattern="^(\s*,?\s*[0-9a-za-z]([-.\w]*[0-9a-za-z])*@([0-9a-za-z][-\w]*[0-9a-za-z]\.)+[a-za-z]{2,4})+\s*$" name="cc" placeholder="cc。複数はカンマ区切り。構文はfrom同様">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -195,7 +195,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             bcc
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="bcc">
+                            <input class="form-control" pattern="^(\s*,?\s*[0-9a-za-z]([-.\w]*[0-9a-za-z])*@([0-9a-za-z][-\w]*[0-9a-za-z]\.)+[a-za-z]{2,4})+\s*$" name="bcc" placeholder="bcc。複数はカンマ区切り。構文はfrom同様">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -203,7 +203,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             subject
                         </div>
                         <div class="w-75">
-                            <input class="form-control" name="subject">
+                            <input class="form-control" name="subject" placeholder="件名">
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -211,7 +211,7 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
                             body
                         </div>
                         <div class="w-75">
-                            <textarea rows="4" class="form-control" name="body"></textarea>
+                            <textarea rows="4" class="form-control" name="body" placeholder="本文"></textarea>
                         </div>
                     </div>
                     <div class="d-flex mt-2">
@@ -368,7 +368,12 @@ export default grapesjs.plugins.add('bys-command-custom-export-template', (edito
 
         .modal-body {
             padding: 2px 16px;
-        }`);
+        }
+        
+        input:invalid {
+            border-color: red;
+        }
+        `);
         return styleElement;
     }
 

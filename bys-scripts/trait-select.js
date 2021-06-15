@@ -4,7 +4,6 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
             defaults: {
                 traits: [
                     // Strings are automatically converted to text types
-                    'id',
                     'name', // Same as: { type: 'text', name: 'name' }
                     {
                         type: 'select', // Type of the trait
@@ -12,7 +11,7 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
                         name: 'bys-value', // The name of the attribute/property to use on component
                         options: [
                             { value: '', name: '' },
-                            { value: 'masterdata', name: 'Masterdata' },
+                            { value: 'masterdata', name: 'GetMasterdata' },
                             { value: 'other', name: 'Other' },
                         ],
                         changeProp: 1,
