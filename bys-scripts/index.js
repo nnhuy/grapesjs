@@ -1,8 +1,12 @@
 import traitSelect from './trait-select.js';
 import traitText from './trait-text.js';
 import traitButton from './trait-button.js';
+import traitCheckbox from './trait-checkbox.js';
 import commandExportTemplate from './command-export-template.js';
 import commandExportTemplatePromise from './command-export-template-promise.js';
+import commandImportTemplate from './command-import-template.js';
+import commandUndo from './command-undo.js';
+import commandRedo from './command-redo.js';
 import exportZip from './export-zip.js';
 import exportZipPromise from './export-zip-promise.js';
 
@@ -21,8 +25,12 @@ var editor = grapesjs.init({
         traitSelect,
         traitText,
         traitButton,
+        traitCheckbox,
         commandExportTemplate,
         commandExportTemplatePromise,
+        commandImportTemplate,
+        commandUndo,
+        commandRedo,
         exportZip,
         exportZipPromise
     ],
@@ -91,34 +99,59 @@ var editor = grapesjs.init({
 const panelManager = editor.Panels;
 panelManager.removeButton('options', 'export-template');
 panelManager.addButton('options', {
-    id: 'bys-export-template',
-    className: 'fa fa-code',
-    command: 'custom-export-template',
-    attributes: { title: 'Custom view code' },
+    id: 'bys-undo',
+    className: 'fa fa-undo',
+    command: 'custom-undo',
+    attributes: { title: 'Undo' },
     active: false,
 });
 panelManager.addButton('options', {
-    id: 'bys-export-template-promise',
-    className: 'fa fa-code',
-    command: 'custom-export-template-promise',
-    attributes: { title: 'Custom view code' },
+    id: 'bys-redo',
+    className: 'fa fa-repeat',
+    command: 'custom-redo',
+    attributes: { title: 'Redo' },
+    active: false,
+});
+panelManager.addButton('options', {
+    id: 'bys-import-template',
+    className: 'fa fa-download',
+    command: 'custom-import-template',
+    attributes: { title: 'Import' },
     active: false,
 });
 // panelManager.addButton('options', {
-//     id: 'bys-export-zip',
-//     className: 'fa fa-file-archive-o',
-//     command: 'bys-export-zip',
-//     attributes: { title: 'Export Zip' },
+//     id: 'bys-export-template',
+//     className: 'fa fa-code',
+//     command: 'custom-export-template',
+//     attributes: { title: 'Custom view code' },
 //     active: false,
 // });
-// panelManager.addButton('options', {
-//     id: 'bys-export-zip-promise',
-//     className: 'fa fa-file-archive-o',
-//     command: 'bys-export-zip-promise',
-//     attributes: { title: 'Export Zip' },
-//     active: false,
-// });
+panelManager.addButton('options', {
+    id: 'bys-export-template-promise',
+    className: 'fa fa-code',
+    command: 'bys-export-zip-promise',
+    attributes: { title: 'Download' },
+    active: false,
+});
 const pageTitle = document.createElement('div');
 pageTitle.innerHTML = 'CRM PageEditor';
 pageTitle.classList.add('page-title');
 panelManager.getPanelsEl().getElementsByClassName("gjs-pn-devices-c")[0].prepend(pageTitle);
+
+var blockManager = editor.BlockManager;
+blockManager.add('blank-form', {
+  label: 'Blank Form',
+  media: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 5.5c0-.3-.5-.5-1.3-.5H3.4c-.8 0-1.3.2-1.3.5v3c0 .3.5.5 1.3.5h17.4c.8 0 1.3-.2 1.3-.5v-3zM21 8H3V6h18v2zM22 10.5c0-.3-.5-.5-1.3-.5H3.4c-.8 0-1.3.2-1.3.5v3c0 .3.5.5 1.3.5h17.4c.8 0 1.3-.2 1.3-.5v-3zM21 13H3v-2h18v2z"/><rect width="10" height="3" x="2" y="15" rx=".5"/></svg>',
+  content: {
+    type: 'form',
+    components: [
+        {
+            // content: `<div data-gjs-type="default" draggable="true" data-highlightable="1" class="gjs-row" id="ixop"><div data-gjs-type="default" draggable="true" data-highlightable="1" class="gjs-cell" id="i5oz"></div></div>`
+            // components: [
+            //     { type: 'input' },
+            //   ]
+        }
+    ]
+  },
+  category: { id: 'forms', label: 'Forms' },
+});

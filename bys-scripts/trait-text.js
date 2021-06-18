@@ -21,6 +21,7 @@ export default grapesjs.plugins.add('bys-trait-text', (editor, options) => {
             options: [ // Array of options
                 { value: '', name: '' },
                 { value: 'onload', name: 'onload' },
+                { value: 'onCallIncoming', name: 'onCallIncoming' },
             ]
         });
     };

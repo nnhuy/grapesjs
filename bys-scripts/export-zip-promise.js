@@ -10,7 +10,10 @@ export default (editor, opts = {}) => {
         filename: null,
         root: {
             css: {
-                'style.css': ed => ed.getCss(),
+                'style.css': ed => generateCss(ed),
+            },
+            js: {
+                'script.js': ed => generageScript(ed)
             },
             'index.html': ed =>
                 generateHtml(),
@@ -85,22 +88,19 @@ export default (editor, opts = {}) => {
         });
     }
 
-    function generateHtml() {
-        const htmlElement = document.createElement('html');
-        const headElement = document.createElement('head');
-        const linkCss = document.createElement('link');
-        linkCss.rel = 'stylesheet';
-        linkCss.href = './css/style.css';
-        headElement.append(linkCss);
-        const defaultStyle = createDefaultStyle();
-        headElement.append(defaultStyle);
-        const bodyElement = document.createElement('body');
+    function generateCss(editor) {
+        let result = '';
+        result += createDefaultStyle();
+        result += createSendEmailModalStyle();
+        result += editor.getCss();
+        return result;
+    }
+
+    function generageScript(editor) {
         const allElement = document.createElement('div');
         allElement.innerHTML = editor.getHtml();
         const allElementHasOnLoad = allElement.querySelectorAll('[bys-event="onload"]') || [];
-        const scriptTag = document.createElement('script');
-        scriptTag.append('\n');
-        scriptTag.append("window.addEventListener('DOMContentLoaded', function() {\n");
+        let result = `window.addEventListener('DOMContentLoaded', function() {\n`;
         /* build onload script with all div and select has value */
         allElementHasOnLoad.forEach((e) => {
             const valueOnload = e.getAttribute('bys-value');
@@ -109,7 +109,8 @@ export default (editor, opts = {}) => {
                     const idOfTag = e.getAttribute('id');
                     let command = `var ${idOfTag}Value = ${valueOnload};\n`;
                     command += `${idOfTag}Value.then(value => document.getElementById('${idOfTag}').innerHtml = value);\n`
-                    scriptTag.append(command);
+                    result += command;
+                    result += '\n';
                 } else if (e.tagName === 'SELECT') {
                     // create json object
                     const tableNameValue = e.getAttribute('bys-master-data-table');
@@ -135,20 +136,53 @@ export default (editor, opts = {}) => {
                       };
                   }
               });\n`;
-                    scriptTag.append(command);
+                    result += command;
+                    result += '\n';
                 }
             }
         });
-        scriptTag.append('}\n);');
-        headElement.append(scriptTag);
+        result += `});\n`;
         /* build send email modal with button has click event */
         const hasSendEmail = allElement.querySelectorAll('button[onclick="openModalSendEmail()"]') || [];
         if (hasSendEmail.length) {
-            const scriptSendEmail = createSendEmailModalScript();
-            const styleSendEmail = createSendEmailModalStyle();
+            result += createSendEmailModalScript();
+        }
+        /* build call incoming function */
+        const allElementHasCallIncomingEvent = allElement.querySelectorAll('div[bys-event="onCallIncoming"]') || [];
+        let commandCallIncoming = '';
+        if (allElementHasCallIncomingEvent.length) {
+            allElementHasCallIncomingEvent.forEach(e => {
+                const idOfTag = e.getAttribute('id');
+                commandCallIncoming += `
+                document.getElementById('${idOfTag}').innerHtml = 'onCall_Incoming: callerNumber: ' + callerNumber + ', receivedNumber: ' + ReceivedNumber + ', callId: ' + callid;\n
+                `;
+            });
+        }
+        result += `
+        function systemEvent_onCall_Incoming(callerNumber, ReceivedNumber, callid){
+            ${commandCallIncoming}
+        };
+        `;
+        return result;
+    }
+
+    function generateHtml() {
+        const htmlElement = document.createElement('html');
+        const headElement = document.createElement('head');
+        const linkCss = document.createElement('link');
+        linkCss.rel = 'stylesheet';
+        linkCss.href = './css/style.css';
+        headElement.append(linkCss);
+        const linkScript = document.createElement('script');
+        linkScript.src = './js/script.js';
+        headElement.append(linkScript);
+        const bodyElement = document.createElement('body');
+        const allElement = document.createElement('div');
+        allElement.innerHTML = editor.getHtml();
+        /* build send email modal with button has click event */
+        const hasSendEmail = allElement.querySelectorAll('button[onclick="openModalSendEmail()"]') || [];
+        if (hasSendEmail.length) {
             const modalSendEmail = createModalSendEmail();
-            headElement.append(scriptSendEmail);
-            headElement.append(styleSendEmail);
             bodyElement.append(modalSendEmail);
         }
         htmlElement.append(headElement);
@@ -244,7 +278,7 @@ export default (editor, opts = {}) => {
                         attachfiles
                     </div>
                     <div class="w-75">
-                        <input type="file" name="attachfiles">
+                        <input id="send-email-file" type="file" name="attachfiles">
                     </div>
                 </div>
                 <div class="d-flex justify-content-center mt-2">
@@ -259,178 +293,191 @@ export default (editor, opts = {}) => {
     }
 
     function createDefaultStyle() {
-        const styleElement = document.createElement('style');
-        styleElement.append(`
-    /* Global style */
-    .d-flex {
-        display: flex;
-    }
-
-    .w-25 {
-        width: 25%;
-    }
-
-    .w-50 {
-        width: 50%;
-    }
-
-    .w-75 {
-        width: 75%;
-    }
-
-    .w-100 {
-        width: 100%;
-    }
-
-    .form-control {
-        width: 100%;
-        border: 1px solid gray;
-        border-radius: 0.25rem;
-        height: 2rem;
-        padding: 0.5rem;
-    }
-
-    .mt-2 {
-        margin-top: 0.5rem;
-    }
-
-    .justify-content-center {
-        justify-content: center;
-    }
-
-    .ms-2 {
-        margin-left: 0.5rem;
-    }
-
-    .text-center {
-        text-align: center;
-    }`);
+        const styleElement = `
+        /* Global style */
+        .d-flex {
+            display: flex;
+        }
+    
+        .w-25 {
+            width: 25%;
+        }
+    
+        .w-50 {
+            width: 50%;
+        }
+    
+        .w-75 {
+            width: 75%;
+        }
+    
+        .w-100 {
+            width: 100%;
+        }
+    
+        .form-control {
+            width: 100%;
+            border: 1px solid gray;
+            border-radius: 0.25rem;
+            height: 2rem;
+            padding: 0.5rem;
+        }
+    
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+    
+        .justify-content-center {
+            justify-content: center;
+        }
+    
+        .ms-2 {
+            margin-left: 0.5rem;
+        }
+    
+        .text-center {
+            text-align: center;
+        }\n`;
         return styleElement;
     }
 
     function createSendEmailModalStyle() {
-        const styleElement = document.createElement('style');
-        styleElement.append(`
-    /* The Modal (background) */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        padding-top: 100px;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgb(0, 0, 0);
-        background-color: rgba(0, 0, 0, 0.4);
-    }
-
-    /* Modal Content */
-    .modal-content {
-        position: relative;
-        background-color: #fefefe;
-        margin: auto;
-        padding: 0;
-        width: 40%;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-        -webkit-animation-name: animatetop;
-        -webkit-animation-duration: 0.4s;
-        animation-name: animatetop;
-        animation-duration: 0.4s
-    }
-
-    /* Add Animation */
-    @-webkit-keyframes animatetop {
-        from {
-            top: -300px;
-            opacity: 0
-        }
-
-        to {
+        const styleElement = `
+        /* The Modal (background) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
             top: 0;
-            opacity: 1
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
         }
-    }
-
-    @keyframes animatetop {
-        from {
-            top: -300px;
-            opacity: 0
-        }
-
-        to {
-            top: 0;
-            opacity: 1
-        }
-    }
-
-    /* The Close Button */
-    .close {
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        position: absolute;
-        right: 1rem;
-        top: 0.5rem;
-    }
-
-    .close:hover,
-    .close:focus {
-        color: #000;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .modal-header {
-        padding: 1rem;
-        border-bottom: 1px solid lightgray;
-    }
-
-    .modal-header p {
-        margin: 0;
-    }
-
-    .modal-body {
-        padding: 2px 16px;
-    }
     
-    input:invalid {
-        border-color: red;
-    }
-    `);
+        /* Modal Content */
+        .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            padding: 0;
+            width: 40%;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            -webkit-animation-name: animatetop;
+            -webkit-animation-duration: 0.4s;
+            animation-name: animatetop;
+            animation-duration: 0.4s
+        }
+    
+        /* Add Animation */
+        @-webkit-keyframes animatetop {
+            from {
+                top: -300px;
+                opacity: 0
+            }
+    
+            to {
+                top: 0;
+                opacity: 1
+            }
+        }
+    
+        @keyframes animatetop {
+            from {
+                top: -300px;
+                opacity: 0
+            }
+    
+            to {
+                top: 0;
+                opacity: 1
+            }
+        }
+    
+        /* The Close Button */
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 1rem;
+            top: 0.5rem;
+        }
+    
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    
+        .modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid lightgray;
+        }
+    
+        .modal-header p {
+            margin: 0;
+        }
+    
+        .modal-body {
+            padding: 2px 16px;
+        }
+        
+        input:invalid {
+            border-color: red;
+        }\n
+        `;
         return styleElement;
     }
 
     function createSendEmailModalScript() {
-        const scriptElement = document.createElement('script');
-        scriptElement.append(`var modalSendEmail;
-    window.addEventListener('DOMContentLoaded', function () {
-        modalSendEmail = document.getElementById("sendEmailModal");
-        window.onclick = function (event) {
-            if (event.target == modalSendEmail) {
-                closeModalSendEmail();
+        const scriptElement = `
+        var modalSendEmail;
+        window.addEventListener('DOMContentLoaded', function () {
+            modalSendEmail = document.getElementById("sendEmailModal");
+            window.onclick = function (event) {
+                if (event.target == modalSendEmail) {
+                    closeModalSendEmail();
+                }
+            }
+            document.getElementById('send-email-file').addEventListener('change', validateFileSize, false);
+        });
+
+        function validateFileSize(event) {
+            const file = event.target.files[0];
+            /* if file size is more than 25mb, alert and remove it */
+            if (file.size > 1024 * 25) {
+                alert('Please choo file less than 25MB');
+                event.target.value = null;
             }
         }
-    });
-    function closeModalSendEmail() {
-        modalSendEmail.style.display = "none";
-    }
 
-    function openModalSendEmail() {
-        modalSendEmail.style.display = "block";
-    }
-
-    function sendEmail() {
-        const formSendEmail = document.getElementById('formSendEmail');
-        const formSendEmailData = new FormData(formSendEmail);
-        for (var pair of formSendEmailData.entries()) {
-            console.log(pair[0] + ', ' + pair[1]);
+        function closeModalSendEmail() {
+            modalSendEmail.style.display = "none";
+            const formSendEmail = document.getElementById('formSendEmail');
+            formSendEmail.reset();
         }
-        window.parent.Call_API_SendMail(formSendEmailData);
-        closeModalSendEmail();
-        formSendEmail.reset();
-    }`);
+
+        function openModalSendEmail() {
+            modalSendEmail.style.display = "block";
+        }
+
+        function sendEmail() {
+            const formSendEmail = document.getElementById('formSendEmail');
+            const formSendEmailData = new FormData(formSendEmail);
+            for (var pair of formSendEmailData.entries()) {
+                console.log(pair[0] + ', ' + pair[1]);
+            }
+            if (formSendEmail.checkValidity()) {
+                closeModalSendEmail();
+                formSendEmail.reset();
+                window.parent.Call_API_SendMail(formSendEmailData);
+            }
+        }\n`;
         return scriptElement;
     }
 };
