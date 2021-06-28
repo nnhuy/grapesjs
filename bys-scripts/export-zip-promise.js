@@ -9,12 +9,8 @@ export default (editor, opts = {}) => {
         filenamePfx: 'CRM-PageEditor',
         filename: null,
         root: {
-            css: {
-                'style.css': ed => generateCss(ed),
-            },
-            js: {
-                'script.js': ed => generageScript(ed)
-            },
+            'style.css': ed => generateCss(ed),
+            'script.js': ed => generageScript(ed),
             'index.html': ed =>
                 generateHtml(),
         },
@@ -163,6 +159,10 @@ export default (editor, opts = {}) => {
             ${commandCallIncoming}
         };
         `;
+        const scriptFromImport = localStorage.getItem('js-import');
+        if (scriptFromImport) {
+            result += `\n${scriptFromImport}\n`;
+        }
         return result;
     }
 
@@ -171,10 +171,10 @@ export default (editor, opts = {}) => {
         const headElement = document.createElement('head');
         const linkCss = document.createElement('link');
         linkCss.rel = 'stylesheet';
-        linkCss.href = './css/style.css';
+        linkCss.href = './style.css';
         headElement.append(linkCss);
         const linkScript = document.createElement('script');
-        linkScript.src = './js/script.js';
+        linkScript.src = './script.js';
         headElement.append(linkScript);
         const bodyElement = document.createElement('body');
         const allElement = document.createElement('div');

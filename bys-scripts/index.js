@@ -9,6 +9,7 @@ import commandUndo from './command-undo.js';
 import commandRedo from './command-redo.js';
 import exportZip from './export-zip.js';
 import exportZipPromise from './export-zip-promise.js';
+import importFileZip from './command-import-file-zip.js';
 
 var editor = grapesjs.init({
     showOffsets: 1,
@@ -32,7 +33,8 @@ var editor = grapesjs.init({
         commandUndo,
         commandRedo,
         exportZip,
-        exportZipPromise
+        exportZipPromise,
+        importFileZip
     ],
     pluginsOpts: {
 
@@ -131,6 +133,13 @@ panelManager.addButton('options', {
     className: 'fa fa-code',
     command: 'bys-export-zip-promise',
     attributes: { title: 'Download' },
+    active: false,
+});
+panelManager.addButton('options', {
+    id: 'bys-import-file-zip',
+    className: 'fa fa-file-archive-o',
+    command: 'custom-import-file-zip',
+    attributes: { title: 'Import file zip' },
     active: false,
 });
 const pageTitle = document.createElement('div');
