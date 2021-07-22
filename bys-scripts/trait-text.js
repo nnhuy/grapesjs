@@ -10,7 +10,7 @@ export default grapesjs.plugins.add('bys-trait-text', (editor, options) => {
             name: "bys-value",
             options: [ // Array of options
                 { value: '', name: '' },
-                { value: 'window.parent.CRM_Global_Information.getUserId()', name: 'GetUserId' },
+                { value: 'window.parent.CRM_Global_Information.getUserLoginId()', name: 'GetUserLoginId' },
                 { value: 'window.parent.CRM_Global_Information.getWorkId()', name: 'GetWorkId' },
             ]
         });
@@ -21,6 +21,7 @@ export default grapesjs.plugins.add('bys-trait-text', (editor, options) => {
             options: [ // Array of options
                 { value: '', name: '' },
                 { value: 'onload', name: 'onload' },
+                { value: 'systemEvent_onLoad', name: 'systemEvent_onLoad' },
                 { value: 'onCallIncoming', name: 'onCallIncoming' },
             ]
         });

@@ -64,6 +64,7 @@ export default (editor, opts = {}) => {
             const zip = new JSZip();
             this.createDirectory(zip, config.root).then(() => {
                 zip.generateAsync({ type: 'blob' })
+                // zip.generateAsync({ type: 'blob', encodeFileName: 'UTF-8' })
                     .then(content => {
                         const filenameFn = config.filename;
                         let filename = filenameFn ?
@@ -95,16 +96,15 @@ export default (editor, opts = {}) => {
     function generageScript(editor) {
         const allElement = document.createElement('div');
         allElement.innerHTML = editor.getHtml();
-        const allElementHasOnLoad = allElement.querySelectorAll('[bys-event="onload"]') || [];
-        let result = `window.addEventListener('DOMContentLoaded', function() {\n`;
+        const allElementHasOnLoad = allElement.querySelectorAll('[bys-event="systemEvent_onLoad"]') || [];
+        let result = `const systemEventOnLoad = async () => {\n`;
         /* build onload script with all div and select has value */
         allElementHasOnLoad.forEach((e) => {
             const valueOnload = e.getAttribute('bys-value');
             if (valueOnload) {
                 if (e.tagName === 'DIV') {
                     const idOfTag = e.getAttribute('id');
-                    let command = `var ${idOfTag}Value = ${valueOnload};\n`;
-                    command += `${idOfTag}Value.then(value => document.getElementById('${idOfTag}').innerHtml = value);\n`
+                    let command = `document.getElementById('${idOfTag}').innerHTML = ${valueOnload};\n`;
                     result += command;
                     result += '\n';
                 } else if (e.tagName === 'SELECT') {
@@ -115,29 +115,33 @@ export default (editor, opts = {}) => {
                     const orderValue = e.getAttribute('bys-master-data-sort');
                     const jsonObject = {
                         TableName: tableNameValue,
-                        Columns: columnNameValue,
+                        Columns: `spkid,${columnNameValue}`,
                         Where: whereValue,
                         Order: orderValue
                     };
                     const idOfTag = e.getAttribute('id');
-                    let command = `var ${idOfTag}SendData = ${JSON.stringify(jsonObject)};
-              var ${idOfTag}Value = window.parent.Call_API_GetMasterData(${idOfTag}SendData);
-              ${idOfTag}Value.then(value => {
-                  if (value.Result) {
-                      for(var i = 0; i < value.Values.length; i++){
-                          var option = document.createElement("option");
-                          option.text = value.Values[i];
-                          option.value = value.Values[i];
-                          document.getElementById('${idOfTag}').appendChild(option);
-                      };
-                  }
-              });\n`;
+                    let command = `const ${idOfTag}SendData = ${JSON.stringify(jsonObject)};
+                    const ${idOfTag}Value = window.parent.Call_API_GetMasterData(${idOfTag}SendData);
+                    if (${idOfTag}Value.Result) {
+                        const ${idOfTag}Select = document.getElementById('${idOfTag}');
+                        for(let i = 0; i < ${idOfTag}Value.Values.length; i++){
+                            const option = document.createElement("option");
+                            option.value = ${idOfTag}Value.Values[i][0];
+                            option.text = ${idOfTag}Value.Values[i][1];
+                            ${idOfTag}Select.appendChild(option);
+                        };
+                    };\n`;
                     result += command;
                     result += '\n';
                 }
             }
         });
-        result += `});\n`;
+        result += `}
+
+        function systemEvent_onLoad() {
+            return systemEventOnLoad();
+        }
+        \n`;
         /* build send email modal with button has click event */
         const hasSendEmail = allElement.querySelectorAll('button[onclick="openModalSendEmail()"]') || [];
         if (hasSendEmail.length) {
@@ -175,7 +179,6 @@ export default (editor, opts = {}) => {
         headElement.append(linkCss);
         const linkScript = document.createElement('script');
         linkScript.src = './script.js';
-        headElement.append(linkScript);
         const bodyElement = document.createElement('body');
         const allElement = document.createElement('div');
         allElement.innerHTML = editor.getHtml();
@@ -187,6 +190,7 @@ export default (editor, opts = {}) => {
         }
         htmlElement.append(headElement);
         bodyElement.append(allElement);
+        bodyElement.append(linkScript);
         htmlElement.append(bodyElement);
         return htmlElement.outerHTML;
     }

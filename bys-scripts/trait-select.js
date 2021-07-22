@@ -23,6 +23,7 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
                         options: [ // Array of options
                             { value: '', name: '' },
                             { value: 'onload', name: 'onload' },
+                            { value: 'systemEvent_onLoad', name: 'systemEvent_onLoad' },
                         ]
                     }
                 ]
@@ -35,6 +36,7 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
 
             },
             valueChange() {
+                console.log('change');
                 this.attributes.attributes['bys-value'] = this.getTrait('bys-value').props().value;
                 switch (this.getTrait('bys-value').props().value) {
                     case 'masterdata':
@@ -45,21 +47,18 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
                                 name: 'bys-master-data-table', // The name of the attribute/property to use on component
                                 options: [
                                     { value: '', name: '' },
-                                    { value: 'Table 1', name: 'Table 1' },
-                                    { value: 'Table 2', name: 'Table 2' },
-                                    { value: 'Table 3', name: 'Table 3' }
-                                ]
+                                    { value: 'table1', name: 'table1' },
+                                    { value: 'table2', name: 'table2' },
+                                    { value: 'table3', name: 'table3' },
+                                    { value: 'tjg商品マスタ', name: 'tjg商品マスタ' }
+                                ],
+                                changeProp: 1,
                             });
                             this.addTrait({
                                 type: 'select', // Type of the trait
                                 label: 'Column', // The label you will see in Settings
                                 name: 'bys-master-data-column', // The name of the attribute/property to use on component
-                                options: [
-                                    { value: '', name: '' },
-                                    { value: 'Column 1', name: 'Column 1' },
-                                    { value: 'Column 2', name: 'Column 2' },
-                                    { value: 'Column 3', name: 'Column 3' }
-                                ]
+                                options: []
                             });
                             this.addTrait({
                                 type: 'text', // Type of the trait
@@ -76,7 +75,7 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
                                     { value: 'descending', name: 'Descending' }
                                 ]
                             });
-                            this.listenTo(this, 'change:bys-master-data-table', this.dataTableChange);
+                            this.listenTo(this, 'change:bys-master-data-table', this.masterDataTableChange);
                         }
                         break;
                     default:
@@ -86,60 +85,64 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
                         this.removeTrait('bys-master-data-sort');
                         break;
                 }
+            },
+            masterDataTableChange() {
+                const masterDataTableValue = this.getTrait('bys-master-data-table').props().value;
+                this.attributes.attributes['bys-master-data-table'] = masterDataTableValue;
+                const component = editor.getSelected();
+                switch (masterDataTableValue) {
+                    case 'table1':
+                        this.getTrait('bys-master-data-column').set('options', [
+                            { id: 'spkid', name: 'spkid' },
+                            { id: 'col1', name: 'col1' },
+                            { id: 'col2', name: 'col2' },
+                            { id: 'col3', name: 'col3' },
+                        ]);
+                        break;
+                    case 'table2':
+                        this.getTrait('bys-master-data-column').set('options', [
+                            { id: 'spkid', name: 'spkid' },
+                            { id: 'code', name: 'code' },
+                            { id: 'result', name: 'result' },
+                            { id: 'flag', name: 'flag' },
+                        ]);
+                        break;
+                    case 'table3':
+                        this.getTrait('bys-master-data-column').set('options', [
+                            { id: 'spkid', name: 'spkid' },
+                            { id: 'category', name: 'category' },
+                            { id: 'itemnum', name: 'itemnum' },
+                            { id: 'itemname', name: 'itemname' },
+                            { id: 'price', name: 'price' },
+                            { id: 'discount', name: 'discount' },
+                            { id: 'tax', name: 'tax' },
+                            { id: 'total', name: 'total' },
+                            { id: 'shipcost', name: 'shipcost' },
+                            { id: 'flag', name: 'flag' },
+                        ]);
+                        break;
+                    case 'tjg商品マスタ':
+                        this.getTrait('bys-master-data-column').set('options', [
+                            { id: 'spkid', name: 'spkid' },
+                            { id: '会社コード', name: '会社コード' },
+                            { id: '区分', name: '区分' },
+                            { id: '商品番号', name: '商品番号' },
+                            { id: '商品名', name: '商品名' },
+                            { id: '単価', name: '単価' },
+                            { id: '割引', name: '割引' },
+                            { id: '税', name: '税' },
+                            { id: '商品合計（税込）', name: '商品合計（税込）' },
+                            { id: 'お届け間隔', name: 'お届け間隔' },
+                            { id: 'プレゼント有無フラグ', name: 'プレゼント有無フラグ' }
+                        ]);
+                        break;
+                    default:
+                        this.getTrait('bys-master-data-column').set('options', []);
+                        break;
+                }
+
             }
         }
     });
 
-    editor.TraitManager.addType('bys-master-data-table', {
-        onEvent({ elInput, component }) {
-            // `elInput` is the result HTMLElement you get from `createInput`
-            console.log(elInput);
-            console.log(component);
-            // const inputType = elInput.querySelector('.href-next__type');
-            // let href = '';
-
-            // switch (inputType.value) {
-            //     case 'url':
-            //         const valUrl = elInput.querySelector('.href-next__url').value;
-            //         href = valUrl;
-            //         break;
-            //     case 'email':
-            //         const valEmail = elInput.querySelector('.href-next__email').value;
-            //         const valSubj = elInput.querySelector('.href-next__email-subject').value;
-            //         href = `mailto:${valEmail}${valSubj ? `?subject=${valSubj}` : ''}`;
-            //         break;
-            // }
-
-            // component.addAttributes({ href });
-        },
-        onUpdate({ elInput, component }) {
-            console.log(elInput);
-            console.log(component);
-            const href = component.getAttributes().href || '';
-            const inputType = elInput.querySelector('.href-next__type');
-            let type = 'url';
-
-            if (href.indexOf('mailto:') === 0) {
-                const inputEmail = elInput.querySelector('.href-next__email');
-                const inputSubject = elInput.querySelector('.href-next__email-subject');
-                const mailTo = href.replace('mailto:', '').split('?');
-                const email = mailTo[0];
-                const params = (mailTo[1] || '').split('&').reduce((acc, item) => {
-                    const items = item.split('=');
-                    acc[items[0]] = items[1];
-                    return acc;
-                }, {});
-                type = 'email';
-
-                inputEmail.value = email || '';
-                inputSubject.value = params.subject || '';
-            } else {
-                elInput.querySelector('.href-next__url').value = href;
-            }
-
-            inputType.value = type;
-            inputType.dispatchEvent(new CustomEvent('change'));
-        },
-
-    });
 })
