@@ -50,7 +50,7 @@ export default grapesjs.plugins.add('bys-trait-select', (editor, options) => {
                                     { value: 'table1', name: 'table1' },
                                     { value: 'table2', name: 'table2' },
                                     { value: 'table3', name: 'table3' },
-                                    { value: 'tjg商品マスタ', name: 'tjg商品マスタ' }
+                                    // { value: 'tjg商品マスタ', name: 'tjg商品マスタ' }
                                 ],
                                 changeProp: 1,
                             });

@@ -124,6 +124,12 @@ export default (editor, opts = {}) => {
                     const ${idOfTag}Value = window.parent.Call_API_GetMasterData(${idOfTag}SendData);
                     if (${idOfTag}Value.Result) {
                         const ${idOfTag}Select = document.getElementById('${idOfTag}');
+                        if (${idOfTag}Select.options.length) {
+                            while (${idOfTag}Select.options.length) {
+                                ${idOfTag}Select.remove(0);
+                            }
+                        }
+
                         for(let i = 0; i < ${idOfTag}Value.Values.length; i++){
                             const option = document.createElement("option");
                             option.value = ${idOfTag}Value.Values[i][0];
@@ -242,7 +248,7 @@ export default (editor, opts = {}) => {
                         to
                     </div>
                     <div class="w-75">
-                        <input class="form-control" pattern="^(\s*,?\s*[0-9a-za-z]([-.\w]*[0-9a-za-z])*@([0-9a-za-z][-\w]*[0-9a-za-z]\.)+[a-za-z]{2,4})+\s*$" name="to" placeholder="to。複数はカンマ区切り。構文はfrom同様">
+                        <input class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" name="to" placeholder="to。複数はカンマ区切り。構文はfrom同様">
                     </div>
                 </div>
                 <div class="d-flex mt-2">
@@ -250,7 +256,7 @@ export default (editor, opts = {}) => {
                         cc
                     </div>
                     <div class="w-75">
-                        <input class="form-control" pattern="^(\s*,?\s*[0-9a-za-z]([-.\w]*[0-9a-za-z])*@([0-9a-za-z][-\w]*[0-9a-za-z]\.)+[a-za-z]{2,4})+\s*$" name="cc" placeholder="cc。複数はカンマ区切り。構文はfrom同様">
+                        <input class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" name="cc" placeholder="cc。複数はカンマ区切り。構文はfrom同様">
                     </div>
                 </div>
                 <div class="d-flex mt-2">
@@ -258,7 +264,7 @@ export default (editor, opts = {}) => {
                         bcc
                     </div>
                     <div class="w-75">
-                        <input class="form-control" pattern="^(\s*,?\s*[0-9a-za-z]([-.\w]*[0-9a-za-z])*@([0-9a-za-z][-\w]*[0-9a-za-z]\.)+[a-za-z]{2,4})+\s*$" name="bcc" placeholder="bcc。複数はカンマ区切り。構文はfrom同様">
+                        <input class="form-control" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" name="bcc" placeholder="bcc。複数はカンマ区切り。構文はfrom同様">
                     </div>
                 </div>
                 <div class="d-flex mt-2">
@@ -479,7 +485,18 @@ export default (editor, opts = {}) => {
             if (formSendEmail.checkValidity()) {
                 closeModalSendEmail();
                 formSendEmail.reset();
-                window.parent.Call_API_SendMail(formSendEmailData);
+                window.parent.Call_API_SendMail(
+                    formSendEmailData.get('mailsettingid'),
+                    formSendEmailData.get('state'),
+                    formSendEmailData.get('linkid'),
+                    formSendEmailData.get('from'),
+                    formSendEmailData.get('to'),
+                    formSendEmailData.get('cc'),
+                    formSendEmailData.get('bcc'),
+                    formSendEmailData.get('subject'),
+                    formSendEmailData.get('body'),
+                    formSendEmailData.get('attachfiles')
+                );
             }
         }\n`;
         return scriptElement;
